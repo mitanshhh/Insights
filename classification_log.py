@@ -101,7 +101,7 @@ def process_ssh_logs(input_file='OpenSSH_2k.log_structured.csv',
 
 
 # FIX: Using explicit absolute paths based on your terminal output
-abs_input = r"logs_2k_ssh.csv"
-abs_output = r"C:\Users\Om Korade\classification-log\training\OpenSSH_Classified_Final.csv"
+abs_input = r"/OpenSSH_2k.log_structured.csv"
+abs_output = r"/logs_2k_ssh.csv"
 
 process_ssh_logs(input_file=abs_input, output_file=abs_output)
