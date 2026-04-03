@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-primary: #f97316; /* Orange 500 for the main button, accents */
+  --color-brand-primary-hover: #ea580c; 
+  --color-bg-base: #0f0f11;
+  --color-bg-sidebar: #131315;
+  --color-bg-panel: #161618;
+  --color-border: #27272a;
+}
+
+:root {
+  --background: #0f0f11;
+  --foreground: #e4e4e7;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, sans-serif;
+}

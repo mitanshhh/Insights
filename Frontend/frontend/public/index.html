@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAGer - AI Security Chatbot</title>
+    <meta name="description" content="This is the Hero Subtitle">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Link to custom stylesheets -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background Effects -->
+    <div class="noise-overlay"></div>
+
+    <!-- Header Navigation -->
+    <header class="glass-header">
+        <div class="container nav-container">
+            <a href="#" class="brand">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+                RAGer
+            </a>
+            
+            <nav class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#simulation">Simulation</a>
+                <a href="#contact">Contact</a>
+            </nav>
+            
+            <div class="auth-buttons">
+                <a href="/login.html" class="btn-primary" style="text-decoration: none;">Get Started</a>
+            </div>
+
+            <!-- Mobile menu toggle -->
+            <button class="mobile-menu-btn" aria-label="Toggle Menu">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="container hero-content">
+                <h1 class="hero-title reveal">This is the Hero Title</h1>
+                <p class="hero-subtitle reveal delay-1">This is the Hero Subtitle</p>
+            </div>
+
+            <!-- Chatbot UI Mockup -->
+            <div class="container mockup-wrapper reveal delay-3">
+                <div class="mockup-ui glow-border">
+                    <!-- Status Header -->
+                    <div class="mockup-status-header">
+                        <div class="status-card glass-panel">
+                            <span class="status-label">Threat Level</span>
+                            <span class="status-value text-orange pulse-animation">Elevated</span>
+                        </div>
+                        <div class="status-card glass-panel">
+                            <span class="status-label">Future Risk</span>
+                            <span class="status-value">Predicted Attack</span>
+                        </div>
+                        <div class="status-card glass-panel">
+                            <span class="status-label">Recommended Actions</span>
+                            <span class="status-value text-orange">3 Pending</span>
+                        </div>
+                    </div>
+
+                    <div class="mockup-body">
+                        <!-- Sidebar -->
+                        <aside class="mockup-sidebar">
+                            <div class="sidebar-header">Data Sources</div>
+                            <ul class="sidebar-list">
+                                <li class="sidebar-item active">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                                    Log_Analysis_01.csv
+                                </li>
+                                <li class="sidebar-item">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                                    Network_Traffic.csv
+                                </li>
+                            </ul>
+                            
+                            <div class="sidebar-footer">
+                                <a href="#" class="sidebar-settings">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    Settings
+                                </a>
+                            </div>
+                        </aside>
+
+                        <!-- Main Chat View -->
+                        <div class="mockup-chat">
+                            <div class="chat-message bot">
+                                <div class="avatar bg-amber"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-terminal"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg></div>
+                                <div class="message-content">
+                                    <p>I've analyzed <span class="code-span">Network_Traffic.csv</span>. There is an anomalous outbound connection on port 443 detected.</p>
+                                    <div class="code-block">
+                                        <div class="code-header">Log Snippet</div>
+                                        <pre><code>[2026-04-03T19:08:54] INFO: Connection established
+[2026-04-03T19:09:02] WARN: Unusual payload size (5.4MB)
+[2026-04-03T19:09:05] CRIT: Target IP 192.168.x.x matches known C2 vector</code></pre>
+                                    </div>
+                                    <p>Would you like me to isolate the affected node automatically?</p>
+                                </div>
+                            </div>
+                            
+                            <div class="chat-message user">
+                                <div class="avatar bg-zinc">U</div>
+                                <div class="message-content glass-panel-dark">
+                                    <p>Yes, isolate the node and generate a full forensic report.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Workflow Section -->
+        <section id="features" class="workflow-section">
+            <div class="container">
+                <h2 class="section-title reveal">AI-Driven Detection Workflow</h2>
+                <div class="workflow-grid">
+                    
+                    <!-- Step 1 -->
+                    <div class="workflow-card glow-border reveal">
+                        <div class="icon-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                        </div>
+                        <h3>1. Log Ingestion</h3>
+                        <p>Stream massive volumes of CSV and system logs into the processing engine with zero latency.</p>
+                        <div class="visual-box">
+                            <div class="data-stream"></div>
+                            <div class="data-stream"></div>
+                            <div class="data-stream"></div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="workflow-card glow-border reveal delay-1">
+                        <div class="icon-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-activity"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        </div>
+                        <h3>2. AI Classification</h3>
+                        <p>Neural networks categorize logs in real-time into Critical, Warning, and Informational tiers.</p>
+                        <div class="visual-box tags-visual">
+                            <span class="tag crit">Critical</span>
+                            <span class="tag warn">Warning</span>
+                            <span class="tag info">Informational</span>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="workflow-card glow-border reveal delay-2">
+                        <div class="icon-wrapper">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-terminal"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></svg>
+                        </div>
+                        <h3>3. Actionable Intelligence</h3>
+                        <p>Receive precise remediation steps and automated containment protocols directly in chat.</p>
+                        <div class="visual-box chat-visual text-left">
+                            <div class="mini-message">Execute: <code>block_ip.sh</code></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Simulation Section -->
+        <section id="simulation" class="simulation-section">
+            <div class="container text-center">
+                <h2 class="section-title reveal">Attack Simulation Engine</h2>
+                <p class="section-subtitle reveal">Visualize threat vectors through our Digital Twin network map.</p>
+                
+                <div class="digital-twin-container glow-border reveal">
+                    <div class="network-grid" id="network-grid">
+                        <!-- Generated by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer Section -->
+    <footer id="contact" class="site-footer">
+        <div class="container footer-container">
+            <!-- Top Section: 3 Columns -->
+            <div class="footer-grid">
+                
+                <!-- Left Column: Brand -->
+                <div class="footer-col brand-col reveal">
+                    <a href="#" class="brand footer-brand">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+                        RAGer
+                    </a>
+                    <p class="footer-mission">Advanced threat detection and context-aware mitigation engine.</p>
+                    <p class="footer-note">Built for Hackathon 🚀</p>
+                </div>
+
+                <!-- Center Column: Tech Stack -->
+                <div class="footer-col tech-col reveal delay-1">
+                    <h3 class="footer-heading">Built With</h3>
+                    <ul class="footer-list">
+                        <li>HTML5 & Semantic Structure</li>
+                        <li>Vanilla CSS & Styling Filters</li>
+                        <li>Vanilla JavaScript DOM APIs</li>
+                        <li>Lucide Vector Icons</li>
+                    </ul>
+                </div>
+
+                <!-- Right Column: Contact -->
+                <div class="footer-col contact-col reveal delay-2">
+                    <h3 class="footer-heading">Contact</h3>
+                    
+                    <div class="contact-person">
+                        <h4 class="person-name">Mitansh Jadhav</h4>
+                        <a href="mailto:mitansh.jadhav2007@gmail.com" class="contact-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                            <span>mitansh.jadhav2007@gmail.com</span>
+                        </a>
+                        <a href="https://www.linkedin.com/in/mitanshjadhav/" target="_blank" rel="noopener noreferrer" class="contact-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-linkedin"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+                            <span>LinkedIn</span>
+                        </a>
+                    </div>
+
+                    <div class="contact-person">
+                        <h4 class="person-name">Om Korade</h4>
+                        <a href="mailto:omkorade23@gmail.com" class="contact-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                            <span>omkorade23@gmail.com</span>
+                        </a>
+                        <a href="https://www.linkedin.com/in/om-korade-475279398/" target="_blank" rel="noopener noreferrer" class="contact-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-linkedin"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+                            <span>LinkedIn</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bottom Strip -->
+            <div class="footer-bottom">
+                <p>&copy; 2026 RAGer</p>
+                <p>AI Security Simulation Platform</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Script inclusion -->
+    <script src="script.js"></script>
+</body>
+</html>

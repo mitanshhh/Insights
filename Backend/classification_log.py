@@ -3,8 +3,6 @@ import re
 import time
 import pandas as pd
 import numpy as np
-from sentence_transformers import SentenceTransformer
-from sklearn.cluster import DBSCAN
 from groq import Groq
 from dotenv import load_dotenv
 
@@ -51,9 +49,11 @@ def classify_with_llm(log_message, client):
     except Exception as e:
         return f"API Error: {e}"
 
-def process_ssh_logs(input_file='OpenSSH_2k.log_structured.csv', 
-                     output_file='logs_2k_ssh.csv', 
+def process_ssh_logs(input_file='', 
+                     output_file='', 
                      model_name='all-MiniLM-L6-v2'):
+    from sentence_transformers import SentenceTransformer
+    from sklearn.cluster import DBSCAN
     
     df = pd.read_csv(input_file)
 
@@ -73,7 +73,8 @@ def process_ssh_logs(input_file='OpenSSH_2k.log_structured.csv',
     df['regex_label'] = df['Content'].apply(classify_with_regex)
     df_non_regex = df[df['regex_label'].isnull()].copy()
 
-    load_dotenv()
+    env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
+    load_dotenv(env_path)
     client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
     llm_labels = []
@@ -100,8 +101,5 @@ def process_ssh_logs(input_file='OpenSSH_2k.log_structured.csv',
     return df_final
 
 
-# FIX: Using explicit absolute paths based on your terminal output
-abs_input = r"/OpenSSH_2k.log_structured.csv"
-abs_output = r"/logs_2k_ssh.csv"
-
-process_ssh_logs(input_file=abs_input, output_file=abs_output)
+# process_ssh_logs() is called from the Flask API (/api/project/upload)
+# with per-project file paths — do not call it here at module level.

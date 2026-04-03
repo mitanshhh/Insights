@@ -1,0 +1,34 @@
+services:
+  # ── FastAPI Backend ─────────────────────────────────────────────────────────
+  - type: web
+    name: insights-api
+    env: python
+    plan: free
+    branch: main
+    rootDir: Frontend/backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        value: https://insights-api.onrender.com/api/auth/google/callback
+
+  # ── Next.js Frontend ────────────────────────────────────────────────────────
+  - type: web
+    name: insights-frontend
+    env: node
+    plan: free
+    branch: main
+    rootDir: Frontend/frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://insights-api.onrender.com
