@@ -83,33 +83,64 @@ export default function NetworkSimulation() {
           selector: 'node',
           style: {
             'label': 'data(label)',
-            'color': '#000000', // PURE BLACK
+            'color': '#ffffff', // White labels
+            'text-outline-color': '#000000',
+            'text-outline-width': '2px',
             'font-size': '12px',
             'font-weight': 'bold',
-            'background-color': '#f97316', // BRAND ORANGE
-            'width': '50px',
-            'height': '50px',
-            'border-width': '2px',
+            'background-color': '#f97316', // Brand orange
+            'width': '60px',
+            'height': '60px',
+            'border-width': '3px',
             'border-color': '#ffffff',
             'text-valign': 'center',
             'text-halign': 'center',
+            'overlay-opacity': 0,
+            'transition-property': 'background-color, border-color, border-width, width, height',
+            'transition-duration': '0.3s'
           } as any
         },
         {
           selector: 'edge',
           style: {
             'width': 3,
-            'line-color': '#ffffff', 
-            'target-arrow-color': '#ffffff',
+            'line-color': '#4b5563', // gray-600
+            'target-arrow-color': '#4b5563',
             'target-arrow-shape': 'triangle',
             'curve-style': 'bezier',
+            'opacity': 0.6
+          } as any
+        },
+        {
+          selector: '.compromised',
+          style: {
+            'background-color': '#ef4444', // red-500
+            'border-color': '#ffffff',
+            'border-width': '5px',
+            'width': '75px',
+            'height': '75px',
+            'text-outline-color': '#7f1d1d', // dark red outline
+            'z-index': 100
+          } as any
+        },
+        {
+          selector: '.attack-edge',
+          style: {
+            'line-color': '#ef4444',
+            'target-arrow-color': '#ef4444',
+            'width': 6,
+            'opacity': 1,
+            'line-style': 'dashed',
+            'z-index': 50
           } as any
         }
       ],
       layout: {
-        name: 'grid',
-        padding: 100,
-        fit: true
+        name: 'circle',
+        padding: 50,
+        fit: true,
+        animate: true,
+        animationDuration: 1000,
       } as any,
     });
 
@@ -128,10 +159,13 @@ export default function NetworkSimulation() {
     
     // Final force fit with safety delay
     setTimeout(() => {
-        cy.resize();
-        cy.fit();
-        cy.center();
-    }, 200);
+        if (cy) {
+          cy.resize();
+          cy.fit();
+          cy.center();
+          console.log("Cytoscape initialized and fitted nodes:", cy.nodes().length);
+        }
+    }, 500);
 
     return () => {
       cy.destroy();

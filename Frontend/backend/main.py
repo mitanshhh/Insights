@@ -7,9 +7,7 @@ load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))          # Fr
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.sessions import SessionMiddleware
-
-from routers import auth, logs
+from routers import logs
 
 app = FastAPI(
     title="Insights API",
@@ -21,12 +19,6 @@ app = FastAPI(
 @app.get("/")
 def home():
     return {"message": "API working"}
-
-# ── Session middleware (required by authlib OAuth for state/nonce storage) ──
-app.add_middleware(
-    SessionMiddleware,
-    secret_key=os.getenv("SECRET_KEY", "default_secret_key_change_in_prod"),
-)
 
 # ── CORS ─────────────────────────────────────────────────────────────────────
 app.add_middleware(
@@ -41,8 +33,8 @@ app.add_middleware(
 )
 
 # ── Routers ───────────────────────────────────────────────────────────────────
-app.include_router(auth.router)
 app.include_router(logs.router)
+
 
 
 @app.get("/health")

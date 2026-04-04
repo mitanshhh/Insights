@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, User, Trash2, X, Upload, LogOut, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Plus, Trash2, X, Upload, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Project } from "@/context/DashboardContext";
@@ -15,34 +15,10 @@ interface SidebarProps {
 
 export default function Sidebar({ projects, activeProjectId, onSelectProject, onAddProject, onDeleteProject }: SidebarProps) {
   const router = useRouter();
-  const [userProfile, setUserProfile] = useState<{name: string, username: string} | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [csvFile, setCsvFile] = useState<File | null>(null);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await fetch('/api/user/profile');
-        if (res.ok) {
-          const data = await res.json();
-          setUserProfile(data);
-        }
-      } catch (err) {
-        console.error('Error fetching profile:', err);
-      }
-    };
-    fetchProfile();
-  }, []);
-
-  const handleSignOut = async () => {
-    try {
-      await fetch('/api/logout', { method: 'POST' });
-      window.location.href = "/";
-    } catch (err) {
-      window.location.href = "/";
-    }
-  };
 
   const handleCreate = async () => {
     if (newProjectName.trim()) {
@@ -112,27 +88,6 @@ export default function Sidebar({ projects, activeProjectId, onSelectProject, on
            </Link>
         </div>
 
-        {/* Logout Button */}
-        <button 
-          onClick={handleSignOut}
-          className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors mb-1"
-        >
-          <LogOut className="w-4 h-4" />
-          <span>Logout</span>
-        </button>
-
-        {/* User Profile */}
-        <div 
-          className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/5 transition-colors border border-transparent hover:border-border/50"
-        >
-          <div className="w-9 h-9 rounded-full bg-gray-800 flex items-center justify-center border border-gray-600">
-            <User className="w-5 h-5 text-gray-300" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-white truncate">{userProfile?.name || 'User'}</div>
-            <div className="text-xs text-gray-500 truncate">{userProfile?.username || 'Analyst'}</div>
-          </div>
-        </div>
       </div>
 
       {/* Modal Overlay */}
