@@ -55,4 +55,4 @@ services:
     startCommand: npm start
     envVars:
       - key: NEXT_PUBLIC_API_URL
-        value: https://backend.onrender.com
+        value: https://backend-8v8h.onrender.com
