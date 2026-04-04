@@ -11,6 +11,14 @@ from dotenv import load_dotenv
 
 from llm_prompting import analyze_soc_threat
 
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+def home():
+    return {"message": "Hello World"}
+
 # Try loading from Hackup/.env (if in Backend/)
 env_path_up = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
 # Try loading from current dir (if in Hackup/ or root)
