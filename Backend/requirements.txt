@@ -9,8 +9,8 @@ flask-mail==0.9.1
 authlib==1.3.0
 python-dotenv==1.0.1
 
-numpy>=1.26.4
-pandas>=2.2.3
+numpy==1.26.4
+pandas==2.2.2
 scikit-learn==1.4.2
 
 passlib==1.7.4
