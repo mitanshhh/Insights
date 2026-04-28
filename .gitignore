@@ -47,8 +47,7 @@ test_fixed.*
 test.csv
 
 # ── Old deployment platform files ───────────────────────────────
-render.yaml
-runtime.txt
+
 
 # ── OS & Editor ─────────────────────────────────────────────────
 .DS_Store
