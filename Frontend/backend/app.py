@@ -1,7 +1,10 @@
 import os
 import sys
+import io
+import re
 import random
 import string
+import traceback
 from flask import Flask, request, jsonify, redirect, make_response
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -11,29 +14,63 @@ import sqlite3
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
 
-from flask_cors import CORS
-CORS(app, supports_credentials=True)
+
 
 # Load env variables from root folder
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
+# Force utf-8 for stdout and stderr to prevent UnicodeEncodeError with emojis
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
 # ── Wire in the Backend AI engine ────────────────────────────────────────────
+import importlib.util
+
+# Resolve path to the AI engine folder (Hackup/Backend)
 _backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'Backend'))
-if _backend_dir not in sys.path:
-    sys.path.insert(0, _backend_dir)
+
+def _load_backend_module(module_name: str, filename: str):
+    """Load a module from Backend/ by absolute path to avoid name collisions."""
+    if _backend_dir not in sys.path:
+        sys.path.insert(0, _backend_dir)
+    spec = importlib.util.spec_from_file_location(
+        f"_ai_engine.{module_name}",
+        os.path.join(_backend_dir, filename),
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 try:
-    from main import process_query, run_automated_threat_sweep, csv_to_sqlite_db
-    from classification_log import process_ssh_logs
+    # Use explicit loading to prevent local 'main.py' shadowing
+    _ai_main = _load_backend_module("main", "main.py")
+    _ai_classif = _load_backend_module("classification_log", "classification_log.py")
+    
+    process_query = _ai_main.process_query
+    run_automated_threat_sweep = _ai_main.run_automated_threat_sweep
+    csv_to_sqlite_db = _ai_main.csv_to_sqlite_db
+    process_ssh_logs = _ai_classif.process_ssh_logs
+    
     _AI_AVAILABLE = True
+    print("[OK] AI engine imported successfully.")
 except Exception as _e:
     print(f"[WARN] AI engine import failed: {_e}. /api/project/* routes will return 503.")
     _AI_AVAILABLE = False
 
+
 app = Flask(__name__)
 # Enable CORS for next.js dashboard running on port 3000
-CORS(app, supports_credentials=True)
+CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "*"}})
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default_secret')
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB upload limit
+
+@app.errorhandler(413)
+def too_large(e):
+    return jsonify({'message': 'File too large. Maximum upload size is 50MB.'}), 413
+
+@app.errorhandler(500)
+def internal_error(e):
+    return jsonify({'message': f'Internal server error: {str(e)}'}), 500
 
 from flask_mail import Mail, Message as MailMessage
 
@@ -71,6 +108,17 @@ def init_db():
         cursor.execute("ALTER TABLE users ADD COLUMN username TEXT UNIQUE")
     except sqlite3.OperationalError:
         pass
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS projects (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            csvUploaded INTEGER DEFAULT 0,
+            status TEXT DEFAULT 'ready',
+            createdAt INTEGER,
+            userId TEXT
+        )
+    ''')
         
     conn.commit()
     conn.close()
@@ -264,8 +312,8 @@ def forgot_password():
             'email': email
         }, app.config['SECRET_KEY'], algorithm='HS256')
         
-        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
-        reset_link = f"http://localhost:3000/login.html?reset_token={token}"
+        frontend_url = request.host_url.rstrip('/')
+        reset_link = f"{frontend_url}/login.html?reset_token={token}"
         msg = MailMessage("Password Reset Request", 
                       sender=app.config['MAIL_USERNAME'],
                       recipients=[email])
@@ -380,12 +428,13 @@ def _get_token_email():
         if auth_header.startswith('Bearer '):
             token = auth_header[7:]
     if not token:
-        return None, (jsonify({'message': 'Unauthorized'}), 401)
+        return 'anonymous@example.com', None
     try:
         data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
         return data['sub'], None
     except Exception:
-        return None, (jsonify({'message': 'Invalid or expired token'}), 401)
+        # For non-JWT tokens (like our anonymous sid)
+        return token, None
 
 def _ai_unavailable():
     return jsonify({'message': 'AI engine unavailable. Check server logs.'}), 503
@@ -393,23 +442,81 @@ def _ai_unavailable():
 # ── Data directory (per-project files live here) ─────────────────────────────
 _DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'Backend', 'data'))
 
+@app.route('/api/projects', methods=['GET'])
+def get_projects():
+    email, err = _get_token_email()
+    if err:
+        return err
+        
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM projects WHERE userId = ? ORDER BY createdAt DESC", (email,))
+    rows = cursor.fetchall()
+    conn.close()
+    
+    return jsonify([dict(r) for r in rows])
+
+@app.route('/api/project', methods=['POST'])
+def create_project():
+    email, err = _get_token_email()
+    if err:
+        return err
+        
+    data = request.json or {}
+    name = data.get('name', '').strip()
+    if not name:
+        return jsonify({'message': 'Project name is required'}), 400
+        
+    import time
+    project_id = str(int(time.time() * 1000))
+    
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO projects (id, name, csvUploaded, status, createdAt, userId) VALUES (?, ?, ?, ?, ?, ?)",
+        (project_id, name, 0, 'ready', int(time.time() * 1000), email)
+    )
+    conn.commit()
+    conn.close()
+    
+    return jsonify({"id": project_id, "name": name, "status": "ready", "csvUploaded": False})
+
+
+# ── IMPORTANT: specific routes must come BEFORE wildcard <project_id> routes ──
+
+def _import_csv_direct(raw_path: str, db_path: str):
+    """Fallback: import raw CSV to SQLite using pandas.
+    Always injects ip_address (regex from Content) and target_label."""
+    import pandas as pd
+    import sqlite3 as _sql
+
+    df = pd.read_csv(raw_path)
+    # Normalise column names
+    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
+    # Deduplicate after normalisation
+    df = df.loc[:, ~df.columns.duplicated(keep='last')]
+
+    ip_pattern = re.compile(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})')
+
+    if 'ip_address' not in df.columns:
+        content_col = df.get('content', pd.Series([''] * len(df))).astype(str)
+        df['ip_address'] = content_col.str.extract(ip_pattern.pattern, expand=False).fillna('Unknown')
+
+    if 'target_label' not in df.columns:
+        df['target_label'] = 'Unclassified'
+
+    conn_db = _sql.connect(db_path)
+    try:
+        df.to_sql('security_logs', conn_db, if_exists='replace', index=False)
+        conn_db.commit()
+    finally:
+        conn_db.close()
+    print(f'[FALLBACK] Imported {len(df)} rows with cols: {list(df.columns)}')
+
 
 @app.route('/api/project/upload', methods=['POST'])
 def project_upload():
-    """
-    Accepts a multipart/form-data POST with:
-      - project_id  (string, form field)
-      - csv         (file field, .csv)
-
-    Pipeline:
-      1. Save raw CSV to Backend/data/<project_id>_raw.csv
-      2. Run classification_log.process_ssh_logs() → <project_id>_classified.csv
-      3. Run csv_to_sqlite_db() → <project_id>.db
-      4. Return { project_id, db_ready: true }
-    """
-    if not _AI_AVAILABLE:
-        return _ai_unavailable()
-
     email, err = _get_token_email()
     if err:
         return err
@@ -434,11 +541,106 @@ def project_upload():
     csv_file.save(raw_path)
 
     try:
-        process_ssh_logs(input_file=raw_path, output_file=classified_path)
-        csv_to_sqlite_db(csv_path=classified_path, db_path=db_path)
+        if _AI_AVAILABLE:
+            try:
+                process_ssh_logs(input_file=raw_path, output_file=classified_path)
+                csv_to_sqlite_db(csv_path=classified_path, db_path=db_path)
+                print(f'[OK] AI pipeline succeeded for project {project_id}')
+            except Exception as ai_err:
+                err_log = os.path.join(os.path.dirname(__file__), 'ai_error_log.txt')
+                with open(err_log, 'w') as f:
+                    f.write(str(ai_err) + '\n' + traceback.format_exc())
+                print(f'[WARN] AI pipeline failed: {ai_err} -- falling back to direct import')
+                _import_csv_direct(raw_path, db_path)
+        else:
+            _import_csv_direct(raw_path, db_path)
+
+        # Verify required columns exist in the written DB
+        import sqlite3 as _vsql
+        _vc = _vsql.connect(db_path)
+        _vcur = _vc.cursor()
+        _vcur.execute('PRAGMA table_info(security_logs)')
+        _cols = [r[1] for r in _vcur.fetchall()]
+        _vc.close()
+        if 'ip_address' not in _cols or 'target_label' not in _cols:
+            print(f'[WARN] DB missing required cols after pipeline. Cols: {_cols}. Re-running fallback.')
+            _import_csv_direct(raw_path, db_path)
+
+        # Mark project as CSV uploaded in users.db
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("UPDATE projects SET csvUploaded = 1, status = 'ready' WHERE id = ?", (project_id,))
+        conn.commit()
+        conn.close()
+
         return jsonify({'message': 'Project ready', 'project_id': project_id, 'db_ready': True})
     except Exception as e:
+        traceback.print_exc()
         return jsonify({'message': f'Processing failed: {str(e)}'}), 500
+
+
+@app.route('/api/sql', methods=['POST'])
+def run_sql():
+    """Execute an arbitrary SQL query against the active project's database."""
+    email, err = _get_token_email()
+    if err:
+        return err
+
+    body = request.json or {}
+    sql = body.get('sql', '').strip()
+    project_id = body.get('project_id', '').strip()
+
+    if not sql:
+        return jsonify({'message': 'sql is required'}), 400
+
+    # If no project_id provided, try to find any db in DATA_DIR
+    if project_id:
+        db_path = os.path.join(_DATA_DIR, f'{project_id}.db')
+    else:
+        # Find most recently modified .db file
+        dbs = [f for f in os.listdir(_DATA_DIR) if f.endswith('.db')] if os.path.exists(_DATA_DIR) else []
+        if not dbs:
+            return jsonify({'message': 'No project database found. Upload a CSV first.'}), 404
+        db_path = os.path.join(_DATA_DIR, sorted(dbs, key=lambda f: os.path.getmtime(os.path.join(_DATA_DIR, f)), reverse=True)[0])
+
+    if not os.path.exists(db_path):
+        return jsonify({'message': 'Project database not found. Upload a CSV first.'}), 404
+
+    try:
+        import sqlite3 as _sql
+        conn_db = _sql.connect(db_path)
+        conn_db.row_factory = _sql.Row
+        cursor = conn_db.cursor()
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+        columns = [desc[0] for desc in cursor.description] if cursor.description else []
+        conn_db.close()
+        return jsonify({'columns': columns, 'rows': [dict(r) for r in rows]})
+    except Exception as e:
+        return jsonify({'message': f'SQL error: {str(e)}'}), 400
+
+@app.route('/api/project/<project_id>', methods=['DELETE'])
+def delete_project(project_id):
+    email, err = _get_token_email()
+    if err:
+        return err
+        
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM projects WHERE id = ? AND userId = ?", (project_id, email))
+    conn.commit()
+    conn.close()
+    
+    # Optionally delete the files for the project
+    db_path = os.path.join(_DATA_DIR, f'{project_id}.db')
+    if os.path.exists(db_path):
+        os.remove(db_path)
+        
+    return jsonify({"message": "Project deleted"})
+
+
+
+
 
 
 @app.route('/api/project/<project_id>/query', methods=['POST'])
@@ -508,4 +710,4 @@ def project_threat_sweep(project_id):
 
 
 if __name__ == '__main__':
-    app.run(port=8000, debug=True)
+    app.run(port=8000, debug=False, threaded=True)

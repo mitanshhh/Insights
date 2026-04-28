@@ -5,15 +5,31 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))   # root (GROQ_API_KEY)
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))          # Frontend/.env (GOOGLE, SECRET_KEY)
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from routers import logs
+
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from rate_limit import limiter
 
 app = FastAPI(
     title="Insights API",
     description="Unified FastAPI backend for Insights AI Security Dashboard",
     version="2.0.0",
 )
+
+app.state.limiter = limiter
+
+def custom_rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(
+        status_code=429,
+        content={"detail": "Too Many Requests. Please slow down.", "error": str(exc.detail)}
+    )
+
+app.add_exception_handler(RateLimitExceeded, custom_rate_limit_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 
 @app.get("/")

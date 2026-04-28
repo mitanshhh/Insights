@@ -30,11 +30,17 @@ export default function ThreatAnalysisPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Only run sweep if it hasn't been run yet for this project
-    if (activeProject?.csvUploaded && !threatReport && !isThreatLoading) {
+    // Run sweep when user arrives on this page if:
+    // - CSV is uploaded
+    // - No report yet OR the stored result was an error (allow retry on navigate)
+    const noReport = !threatReport;
+    const hasError = threatReport && threatReport.error;
+    if (activeProject?.csvUploaded && (noReport || hasError) && !isThreatLoading) {
+      setError(null);
       runThreatSweep().catch(e => setError(e.message || "Threat analysis failed."));
     }
-  }, [activeProject, threatReport, isThreatLoading, runThreatSweep]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeProject?.id, activeProject?.csvUploaded]);
 
   const handleDownload = () => {
     if (!threatReport) return;

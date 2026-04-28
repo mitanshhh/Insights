@@ -149,7 +149,7 @@ export default function ChatArea({
             <button 
               type="submit"
               disabled={!input.trim()}
-              className="p-3 m-1 bg-brand-primary hover:bg-brand-primary-hover disabled:bg-gray-700 disabled:text-gray-500 text-white rounded-xl transition-all shadow-[0_0_10px_rgba(249,115,22,0.3)]"
+              className="p-3 m-1 bg-brand-primary hover:bg-brand-primary-hover disabled:bg-gray-700 disabled:text-gray-500 text-white rounded-xl transition-all shadow-[0_0_10px_rgba(249,115,22,0.3)] cursor-pointer"
             >
               <ArrowRight className="w-5 h-5" />
             </button>
@@ -205,7 +205,7 @@ function ChatMessage({ message }: { message: Message }) {
             <div className="mt-1">
               <button 
                 onClick={() => setShowLog(!showLog)}
-                className="flex items-center gap-2 text-xs font-medium text-brand-primary hover:text-brand-primary-hover transition-colors px-1"
+                className="flex items-center gap-2 text-xs font-medium text-brand-primary hover:text-brand-primary-hover transition-colors px-1 cursor-pointer"
               >
                 {showLog ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 {showLog ? "Hide JSON Log" : "View JSON Log"}

@@ -1,0 +1,41 @@
+# ── Python ──────────────────────────────────────────────────────
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+venv/
+.venv/
+env/
+*.egg-info/
+
+# ── Node / Next.js ──────────────────────────────────────────────
+frontend/frontend/node_modules/
+frontend/frontend/.next/
+frontend/dashboard/
+
+# ── Env & Secrets ───────────────────────────────────────────────
+.env
+*.env
+
+# ── Databases & data ────────────────────────────────────────────
+logs.db
+*.db
+Backend/data/
+Dataset/
+
+# ── Old deployment configs ───────────────────────────────────────
+render.yaml
+runtime.txt
+
+# ── Test / dev junk ─────────────────────────────────────────────
+test_*.py
+test_*.csv
+ai_error_log.txt
+test_fixed.*
+
+# ── OS / editor ─────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log

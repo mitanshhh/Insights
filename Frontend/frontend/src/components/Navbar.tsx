@@ -1,6 +1,6 @@
 "use client";
 
-import { Database, ShieldAlert } from "lucide-react";
+import { Database, ShieldAlert, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -31,9 +31,9 @@ export default function Navbar({ isRightPanelOpen, setIsRightPanelOpen }: Navbar
         
         <Link 
           href="/" 
-          className="flex items-center gap-2.5 text-gray-400 hover:text-white transition-all text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-white/5 active:scale-95"
+          className="flex items-center gap-2 transition-colors text-sm font-medium hover:bg-white/5 px-3 py-1.5 rounded-lg text-gray-400 hover:text-brand-primary"
         >
-          <img src="/logo.png" alt="Home" className="w-5 h-5 object-contain opacity-80" />
+          <Home className="w-4 h-4" />
           <span>Home</span>
         </Link>
 
@@ -51,10 +51,10 @@ export default function Navbar({ isRightPanelOpen, setIsRightPanelOpen }: Navbar
         <button 
           onClick={handleToggleSQL}
           className={cn(
-            "flex items-center gap-2 text-sm font-medium px-3 py-1.5 rounded-lg transition-all",
+            "flex items-center gap-2 text-sm font-medium px-3 py-1.5 rounded-lg transition-colors hover:bg-white/5",
             isRightPanelOpen 
-              ? "bg-brand-primary text-white shadow-[0_0_15px_rgba(249,115,22,0.2)] hover:bg-brand-primary-hover" 
-              : "text-gray-400 hover:text-white hover:bg-white/5"
+              ? "text-brand-primary bg-brand-primary/10" 
+              : "text-gray-400 hover:text-brand-primary"
           )}
         >
           <Database className="w-4 h-4" />

@@ -75,102 +75,109 @@ export default function NetworkSimulation() {
       { data: { id: 'e5', source: 'Auth-Server', target: 'Active-Dir' } }
     ];
 
-    const cy = cytoscape({
-      container: containerRef.current,
-      elements: elements,
-      style: [
-        {
-          selector: 'node',
-          style: {
-            'label': 'data(label)',
-            'color': '#ffffff', // White labels
-            'text-outline-color': '#000000',
-            'text-outline-width': '2px',
-            'font-size': '12px',
-            'font-weight': 'bold',
-            'background-color': '#f97316', // Brand orange
-            'width': '60px',
-            'height': '60px',
-            'border-width': '3px',
-            'border-color': '#ffffff',
-            'text-valign': 'center',
-            'text-halign': 'center',
-            'overlay-opacity': 0,
-            'transition-property': 'background-color, border-color, border-width, width, height',
-            'transition-duration': '0.3s'
-          } as any
-        },
-        {
-          selector: 'edge',
-          style: {
-            'width': 3,
-            'line-color': '#4b5563', // gray-600
-            'target-arrow-color': '#4b5563',
-            'target-arrow-shape': 'triangle',
-            'curve-style': 'bezier',
-            'opacity': 0.6
-          } as any
-        },
-        {
-          selector: '.compromised',
-          style: {
-            'background-color': '#ef4444', // red-500
-            'border-color': '#ffffff',
-            'border-width': '5px',
-            'width': '75px',
-            'height': '75px',
-            'text-outline-color': '#7f1d1d', // dark red outline
-            'z-index': 100
-          } as any
-        },
-        {
-          selector: '.attack-edge',
-          style: {
-            'line-color': '#ef4444',
-            'target-arrow-color': '#ef4444',
-            'width': 6,
-            'opacity': 1,
-            'line-style': 'dashed',
-            'z-index': 50
-          } as any
-        }
-      ],
-      layout: {
-        name: 'circle',
-        padding: 50,
-        fit: true,
-        animate: true,
-        animationDuration: 1000,
-      } as any,
-    });
+    let cy: cytoscape.Core;
 
-    cy.on('tap', 'node', (evt) => {
-      const node = evt.target;
-      setSelectedNode({
-        id: node.data('id'),
-        label: node.data('label'),
-        status: node.hasClass('compromised') ? 'Compromised' : 'Safe',
-        mitre: MOCK_MITRE_MAP[node.data('id')] || 'No significant threats detected.',
-        type: node.data('type')
+    const initCy = () => {
+      if (!containerRef.current) return;
+      
+      cy = cytoscape({
+        container: containerRef.current,
+        elements: elements,
+        style: [
+          {
+            selector: 'node',
+            style: {
+              'label': 'data(label)',
+              'color': '#000000',
+              'text-outline-width': '0px',
+              'font-size': '12px',
+              'font-weight': 'bold',
+              'background-color': '#f97316',
+              'width': '60px',
+              'height': '60px',
+              'border-width': '3px',
+              'border-color': '#ffffff',
+              'text-valign': 'center',
+              'text-halign': 'center',
+              'overlay-opacity': 0,
+              'transition-property': 'background-color, border-color, border-width, width, height',
+              'transition-duration': '0.3s'
+            } as any
+          },
+          {
+            selector: 'edge',
+            style: {
+              'width': 3,
+              'line-color': '#4b5563',
+              'target-arrow-color': '#4b5563',
+              'target-arrow-shape': 'triangle',
+              'curve-style': 'bezier',
+              'opacity': 0.6
+            } as any
+          },
+          {
+            selector: '.compromised',
+            style: {
+              'background-color': '#ef4444',
+              'border-color': '#ffffff',
+              'border-width': '5px',
+              'width': '75px',
+              'height': '75px',
+              'text-outline-width': '0px',
+              'z-index': 100
+            } as any
+          },
+          {
+            selector: '.attack-edge',
+            style: {
+              'line-color': '#ef4444',
+              'target-arrow-color': '#ef4444',
+              'width': 6,
+              'opacity': 1,
+              'line-style': 'dashed',
+              'z-index': 50
+            } as any
+          }
+        ],
+        layout: {
+          name: 'circle',
+          padding: 50,
+          fit: true,
+          animate: true,
+          animationDuration: 1000,
+        } as any,
       });
-    });
 
-    cyRef.current = cy;
-    
-    // Final force fit with safety delay
-    setTimeout(() => {
-        if (cy) {
-          cy.resize();
-          cy.fit();
-          cy.center();
-          console.log("Cytoscape initialized and fitted nodes:", cy.nodes().length);
-        }
-    }, 500);
+      cy.on('tap', 'node', (evt) => {
+        const node = evt.target;
+        setSelectedNode({
+          id: node.data('id'),
+          label: node.data('label'),
+          status: node.hasClass('compromised') ? 'Compromised' : 'Safe',
+          mitre: MOCK_MITRE_MAP[node.data('id')] || 'No significant threats detected.',
+          type: node.data('type')
+        });
+      });
+
+      cyRef.current = cy;
+      
+      cy.resize();
+      cy.fit();
+      cy.center();
+    };
+
+    const timer = setTimeout(initCy, 200);
 
     return () => {
-      cy.destroy();
+      clearTimeout(timer);
+      if (cyRef.current) {
+        cyRef.current.destroy();
+        cyRef.current = null;
+      }
     };
   }, []);
+
+
 
   // ── ATTACK SIMULATION ────────────────────────────────────────────────────
   const runAnalysis = useCallback(async () => {
@@ -197,7 +204,7 @@ export default function NetworkSimulation() {
     // Animate Step-by-Step
     for (let i = 0; i < mockRes.attack_path.length; i++) {
         const nodeId = mockRes.attack_path[i];
-        cyRef.current.$id(nodeId).addClass('compromised');
+        cyRef.current.getElementById(nodeId).addClass('compromised');
         
         if (i > 0) {
             const prevId = mockRes.attack_path[i-1];
@@ -293,7 +300,7 @@ export default function NetworkSimulation() {
 
         {/* Center Canvas */}
         <div className="flex-1 relative bg-[radial-gradient(circle_at_center,_#111113_0%,_#0f0f11_100%)]">
-           <div id="cy-container" ref={containerRef} className="absolute inset-0 z-50" />
+           <div id="cy-container" ref={containerRef} className="absolute inset-0 w-full h-full z-50" />
            
            {/* Floating HUD elements */}
             <div className="absolute top-6 left-6 p-4 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl text-[10px] text-gray-500 font-mono pointer-events-none uppercase tracking-widest z-[60] shadow-2xl">

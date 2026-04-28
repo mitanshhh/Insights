@@ -42,7 +42,7 @@ export default function Sidebar({ projects, activeProjectId, onSelectProject, on
       {/* New Project Button */}
       <button 
         onClick={() => setIsModalOpen(true)}
-        className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl border border-border text-gray-300 hover:text-white hover:border-gray-500 transition-all mb-6 group bg-[#1a1a1d] hover:bg-[#202024]"
+        className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl border border-border text-gray-300 hover:text-white hover:border-gray-500 transition-all mb-6 group bg-[#1a1a1d] hover:bg-[#202024] cursor-pointer"
       >
         <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
         <span className="font-medium text-sm">New Project</span>
@@ -68,7 +68,8 @@ export default function Sidebar({ projects, activeProjectId, onSelectProject, on
             </div>
             <button 
               onClick={(e) => { e.stopPropagation(); onDeleteProject(project.id); }}
-              className="opacity-0 group-hover:opacity-100 hover:text-red-400 transition-opacity p-1"
+              className="hover:text-red-400 transition-colors p-1 text-gray-600 shrink-0 cursor-pointer border border-red-500/50 hover:border-red-400 rounded"
+              title="Delete project"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -83,7 +84,13 @@ export default function Sidebar({ projects, activeProjectId, onSelectProject, on
       <div className="mt-auto pt-4 border-t border-border flex flex-col gap-2">
         {/* Navigation Links */}
         <div className="flex flex-col gap-1 mb-2">
-           <Link href="/dashboard/analysis" className="px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors">
+           <Link href="/dashboard" className="px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
+              Home
+           </Link>
+           <Link href="/dashboard" className="px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
+              Chat
+           </Link>
+           <Link href="/dashboard/analysis" className="px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
               Threat Analysis
            </Link>
         </div>
@@ -122,14 +129,14 @@ export default function Sidebar({ projects, activeProjectId, onSelectProject, on
             <div className="mt-8 flex gap-3 justify-end">
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 rounded-xl text-sm font-medium hover:bg-white/5 text-gray-300 transition-colors"
+                className="px-4 py-2 rounded-xl text-sm font-medium hover:bg-white/5 text-gray-300 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button 
                 onClick={handleCreate}
                 disabled={!newProjectName.trim()}
-                className="px-5 py-2 rounded-xl text-sm font-medium bg-brand-primary hover:bg-brand-primary-hover text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(249,115,22,0.3)]"
+                className="px-5 py-2 rounded-xl text-sm font-medium bg-brand-primary hover:bg-brand-primary-hover text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(249,115,22,0.3)] cursor-pointer"
               >
                 Create Project
               </button>

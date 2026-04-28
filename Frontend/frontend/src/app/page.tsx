@@ -42,30 +42,39 @@ export default function LandingPage() {
             <span className="text-xl font-bold text-white tracking-tight">Insights</span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-10">
-             <Link href="#features" className="text-sm font-medium hover:text-brand-primary transition-colors">Features</Link>
-             <Link href="#simulation" className="text-sm font-medium hover:text-brand-primary transition-colors">Simulation</Link>
-             <Link href="#contact" className="text-sm font-medium hover:text-brand-primary transition-colors">Contact</Link>
-          </nav>
+          <div className="flex items-center gap-8 md:gap-12 ml-auto">
+            <nav className="hidden md:flex items-center gap-10">
+               <Link href="#features" className="text-base md:text-lg font-medium hover:text-brand-primary transition-colors">Features</Link>
+               <Link href="#simulation" className="text-base md:text-lg font-medium hover:text-brand-primary transition-colors">Simulation</Link>
+               <Link href="#contact" className="text-base md:text-lg font-medium hover:text-brand-primary transition-colors">Contact</Link>
+            </nav>
 
-          <div className="flex items-center gap-4">
-             <Link 
-               href="/dashboard" 
-               className="hidden md:inline-flex px-6 py-2 bg-brand-primary hover:bg-brand-primary-hover text-white rounded-xl font-bold text-sm transition-all shadow-[0_4px_15px_rgba(249,115,22,0.4)] hover:translate-y-[-1px] active:scale-95"
-             >
-               Get Started
-             </Link>
-             <button className="md:hidden text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                <Menu className="w-6 h-6" />
-             </button>
+            <div className="flex items-center gap-4">
+               <Link 
+                 href="/dashboard" 
+                 className="hidden md:inline-flex px-6 py-2 bg-brand-primary hover:bg-brand-primary-hover text-white rounded-xl font-bold text-sm transition-all shadow-[0_4px_15px_rgba(249,115,22,0.4)] hover:translate-y-[-1px] active:scale-95"
+               >
+                 Get Started
+               </Link>
+               <button className="md:hidden text-white" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                  <Menu className="w-6 h-6" />
+               </button>
+            </div>
           </div>
         </div>
       </header>
 
       <main>
         {/* Hero Section */}
-        <section className="pt-48 pb-24 text-center px-6">
-           <div className="max-w-4xl mx-auto">
+        <section className="relative pt-48 pb-24 text-center px-6 overflow-hidden">
+           {/* Background glowing grid design */}
+           <div className="absolute inset-0 z-0 pointer-events-none">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-primary/20 blur-[150px] rounded-full" />
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#000000] via-transparent to-[#000000]/20" />
+           </div>
+
+           <div className="relative z-10 max-w-4xl mx-auto">
               <h1 className="text-5xl md:text-7xl font-extrabold text-white leading-tight tracking-tighter mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                  Turn Queries into <span className="bg-gradient-to-r from-brand-primary to-orange-400 bg-clip-text text-transparent italic">Clarity</span>
               </h1>

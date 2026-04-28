@@ -33,8 +33,7 @@ export default function RightPanel({ onClose }: RightPanelProps) {
       const res = await fetch(`/api/sql`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ sql: query }),
+        body: JSON.stringify({ sql: query, project_id: activeProjectId || "" }),
       });
 
       const data = await res.json();
@@ -61,14 +60,11 @@ export default function RightPanel({ onClose }: RightPanelProps) {
           <h2 className="font-semibold tracking-wide">SQL Investigation</h2>
         </div>
         <div className="flex items-center gap-3">
-          <button className="text-gray-400 hover:text-white transition-colors" title="Query History">
-            <History className="w-4 h-4" />
-          </button>
           <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
           <button 
             type="button"
             onClick={(e) => { e.stopPropagation(); onClose(); }} 
-            className="text-gray-400 hover:text-white transition-colors p-1 flex items-center justify-center relative z-10" 
+            className="text-gray-400 hover:text-white transition-colors p-1 flex items-center justify-center relative z-10 cursor-pointer" 
             title="Close Panel"
           >
             <X className="w-5 h-5" />
@@ -96,7 +92,7 @@ export default function RightPanel({ onClose }: RightPanelProps) {
             id="sql-run-btn"
             onClick={handleRunQuery}
             disabled={isLoading || !query.trim()}
-            className="flex items-center gap-2 bg-brand-primary hover:bg-brand-primary-hover disabled:opacity-60 disabled:cursor-not-allowed text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-[0_0_15px_rgba(249,115,22,0.3)]"
+            className="flex items-center gap-2 bg-brand-primary hover:bg-brand-primary-hover disabled:opacity-60 disabled:cursor-not-allowed text-white px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-[0_0_15px_rgba(249,115,22,0.3)] cursor-pointer"
           >
             {isLoading ? (
               <Loader2 className="w-4 h-4 animate-spin" />

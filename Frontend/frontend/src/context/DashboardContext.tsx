@@ -35,10 +35,16 @@ interface DashboardContextType {
   // Threat Analysis
   threatReport: any;
   isThreatLoading: boolean;
-  runThreatSweep: () => Promise<void>;
+  runThreatSweep: (pIdToRun?: string) => Promise<void>;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
+
+// ── All API calls go through the Next.js proxy (/api/...) ──────────────────
+// next.config.ts rewrites /api/:path* → http://127.0.0.1:8000/api/:path*
+// This avoids all CORS preflight issues for cross-origin requests including
+// multipart/form-data file uploads.
+const API = "";  // empty = same-origin, proxy handles routing
 
 export function DashboardProvider({ children }: { children: React.ReactNode }) {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -73,9 +79,23 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   
   const threatReport = activeProjectId ? threatReports[activeProjectId] : null;
 
+  const getAuthHeaders = (): Record<string, string> => {
+    let sid = "";
+    if (typeof window !== "undefined") {
+        sid = localStorage.getItem("insights_session_id") || "";
+        if (!sid) {
+            sid = Math.random().toString(36).substring(2) + Date.now().toString(36);
+            localStorage.setItem("insights_session_id", sid);
+        }
+    }
+    return { "Authorization": `Bearer ${sid}` };
+  };
+
   const fetchProjects = async () => {
     try {
-      const res = await fetch("/api/projects", { credentials: "include" });
+      const res = await fetch(`${API}/api/projects`, { 
+          headers: getAuthHeaders(),
+      });
       if (res.ok) {
         const data = await res.json();
         const normalized = data.map((p: any) => ({
@@ -100,15 +120,14 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
 
   const addProject = async (name: string) => {
     try {
-      const res = await fetch("/api/project", {
+      const res = await fetch(`${API}/api/project`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ name }),
-        credentials: "include",
       });
       if (res.ok) {
         const data = await res.json();
-        setProjects(prev => [data, ...prev]);
+        setProjects(prev => [{ ...data, csvUploaded: false }, ...prev]);
         setActiveProjectId(data.id);
       }
     } catch (e) {
@@ -118,7 +137,6 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
 
   // ── Upload CSV for a project ──────────────────────────────────────────────
   const uploadCSV = async (projectId: string, csvFile: File) => {
-    // Set status to processing
     setProjects(prev =>
       prev.map(p => p.id === projectId ? { ...p, status: "processing" } : p)
     );
@@ -128,52 +146,86 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       formData.append("project_id", projectId);
       formData.append("csv", csvFile);
 
-      const res = await fetch("/api/upload-csv", {
+      // Go through the Next.js proxy — avoids CORS for FormData uploads
+      const res = await fetch(`${API}/api/project/upload`, {
         method: "POST",
+        headers: getAuthHeaders(),  // DO NOT set Content-Type — browser sets it with boundary
         body: formData,
-        credentials: "include",
       });
 
-      const data = await res.json();
-      const newStatus: ProjectStatus = res.ok ? "ready" : "error";
-      
-      setProjects(prev =>
-        prev.map(p => p.id === projectId ? { ...p, status: newStatus, csvUploaded: true } : p)
-      );
-      
-      // Clear threat report for THIS project since new data was uploaded
-      setThreatReports(prev => ({ ...prev, [projectId]: null }));
-    } catch (err) {
+      // Safely parse — response may be plain text on proxy/server errors
+      let data: any = {};
+      try {
+        data = await res.json();
+      } catch {
+        const raw = await res.text().catch(() => "");
+        console.error("Upload: non-JSON response from server:", raw);
+        data = { message: raw || `Server error (${res.status})` };
+      }
+
+      if (res.ok) {
+        setProjects(prev =>
+          prev.map(p => p.id === projectId ? { ...p, status: "ready", csvUploaded: true } : p)
+        );
+        // Clear any stale threat report for this project — sweep must be re-run manually
+        setThreatReports(prev => ({ ...prev, [projectId]: null }));
+      } else {
+        const msg = data.message || `Upload failed (${res.status})`;
+        console.error("Upload failed:", msg);
+        setProjects(prev =>
+          prev.map(p => p.id === projectId ? { ...p, status: "error" } : p)
+        );
+        // Show error in chat so user knows what happened
+        setMessages(prev => ({
+          ...prev,
+          [projectId]: [...(prev[projectId] || []), {
+            id: Date.now().toString(),
+            role: "agent" as const,
+            content: `❌ Upload failed: ${msg}\n\nPlease make sure your backend is running and the CSV file is valid.`
+          }]
+        }));
+      }
+    } catch (err: any) {
+      const msg = err?.message || "Network error";
+      console.error("Upload error:", msg);
       setProjects(prev =>
         prev.map(p => p.id === projectId ? { ...p, status: "error" } : p)
       );
+      setMessages(prev => ({
+        ...prev,
+        [projectId]: [...(prev[projectId] || []), {
+          id: Date.now().toString(),
+          role: "agent" as const,
+          content: `❌ Could not reach backend: ${msg}\n\nMake sure the Flask backend is running on port 8000.`
+        }]
+      }));
     }
   };
 
   // ── Run Threat Sweep (Analysis) ──────────────────────────────────────────
-  const runThreatSweep = React.useCallback(async () => {
-    const pId = activeProjectId; // Capture current ID
-    if (!activeProject?.csvUploaded || !pId) return;
+  const runThreatSweep = React.useCallback(async (pIdToRun?: string) => {
+    const pId = pIdToRun || activeProjectId;
+    if (!pId) return;
     
     setIsThreatLoading(true);
     try {
       console.log(`[DASHBOARD_CONTEXT] Fetching threat sweep for ${pId}...`);
-      const res = await fetch("/api/threat/sweep", { credentials: "include" });
+      const res = await fetch(`${API}/api/project/${pId}/threat-sweep`, { 
+          headers: getAuthHeaders(),
+      });
       
+      const data = await res.json();
+
       if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || `Server Error (${res.status})`);
+        throw new Error(data.message || data.error || `Server Error (${res.status})`);
       }
 
-      const data = await res.json();
-      console.log(`[DASHBOARD_CONTEXT] Response received:`, data);
-      
-      if (data.error) {
-         throw new Error(data.error);
-      }
+      if (data.error) throw new Error(data.error);
       setThreatReports(prev => ({ ...prev, [pId]: data }));
     } catch (e: any) {
       console.error("[DASHBOARD_CONTEXT] Analysis failed:", e);
+      // Store the error in the report state to prevent infinite retry loops in components
+      setThreatReports(prev => ({ ...prev, [pId]: { error: e.message || "Unknown error" } }));
       throw e;
     } finally {
       setIsThreatLoading(false);
@@ -182,9 +234,9 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
 
   const deleteProject = async (id: string) => {
     try {
-      const res = await fetch(`/api/project/${id}`, {
+      const res = await fetch(`${API}/api/project/${id}`, {
         method: "DELETE",
-        credentials: "include"
+        headers: getAuthHeaders(),
       });
       if (res.ok) {
         setProjects(prev => prev.filter(p => p.id !== id));
@@ -205,7 +257,6 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       [activeProjectId]: [...(prev[activeProjectId] || []), userMsg],
     }));
 
-    // Thinking placeholder
     const thinkingId = (Date.now() + 1).toString();
     const thinkingMsg: Message = { id: thinkingId, role: "agent", content: "⏳ Analysing..." };
     setMessages(prev => ({
@@ -214,18 +265,16 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     }));
 
     try {
-      // Strict requirement: POST /api/query
-      const res = await fetch(`/api/query`, {
+      const res = await fetch(`${API}/api/project/${activeProjectId}/query`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ question: content }),
       });
 
       const data = await res.json();
       const answer = data?.answer ?? {};
-      const actualAnswer: string  = answer.actual_answer ?? data.message ?? "No response received.";
-      const jsonLogs: unknown[]   = answer.json_logs ?? [];
+      const actualAnswer: string = answer.actual_answer ?? data.message ?? "No response received.";
+      const jsonLogs: unknown[] = answer.json_logs ?? [];
 
       const agentMsg: Message = {
         id: thinkingId,
@@ -234,7 +283,6 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
         jsonLog: jsonLogs.length > 0 ? JSON.stringify(jsonLogs, null, 2) : undefined,
       };
 
-      // Replace the thinking placeholder
       setMessages(prev => ({
         ...prev,
         [activeProjectId]: (prev[activeProjectId] || []).map(m =>

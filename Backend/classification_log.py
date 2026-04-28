@@ -23,9 +23,14 @@ def classify_with_regex(content):
             return label
     return None
 
-def classify_with_llm(log_message, client):
+import json
+
+def classify_with_llm_bulk(log_messages, client):
+    if not log_messages:
+        return []
+        
     prompt = f"""
-    Classify the following OpenSSH log message into one of these exact categories:
+    Classify the following OpenSSH log messages into one of these exact categories:
     - Max Retries/Failures Exceeded
     - No Identification String
     - Successful Login
@@ -34,41 +39,34 @@ def classify_with_llm(log_message, client):
     - Failed Login
     
     If you cannot figure out a category, return 'Unclassified'.
-    Only return the exact category name. No preamble, no explanation.
     
-    Log message: {log_message}
+    You must return ONLY a valid JSON array of strings, in the exact same order as the inputs.
+    Example: ["Failed Login", "Unclassified", "Connection Error"]
+    
+    Log messages:
+    {json.dumps(log_messages, indent=2)}
     """
     try:
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.0,
-            max_tokens=15
+            response_format={"type": "json_object"}
         )
-        return response.choices[0].message.content.strip()
+        content = response.choices[0].message.content.strip()
+        # Fallback if it wrapped in an object
+        if content.startswith('{'):
+            parsed = json.loads(content)
+            return list(parsed.values())[0] if parsed else ["Unclassified"] * len(log_messages)
+        return json.loads(content)
     except Exception as e:
-        return f"API Error: {e}"
+        print(f"Bulk API Error: {e}")
+        return ["Unclassified"] * len(log_messages)
 
 def process_ssh_logs(input_file='', 
-                     output_file='', 
-                     model_name='all-MiniLM-L6-v2'):
-    from sentence_transformers import SentenceTransformer
-    from sklearn.cluster import DBSCAN
+                     output_file=''):
     
     df = pd.read_csv(input_file)
-
-    model = SentenceTransformer(model_name)
-    embeddings = model.encode(df['Content'].tolist())
-
-    dbscan = DBSCAN(eps=0.2, min_samples=1, metric='cosine')
-    df['cluster'] = dbscan.fit_predict(embeddings)
-
-    cluster_counts = df['cluster'].value_counts()
-    large_clusters = cluster_counts[cluster_counts > 10].index
-
-    for cluster in large_clusters:
-        print(f"\nCluster {cluster}:")
-        print(df[df['cluster'] == cluster]['Content'].head(3).to_string(index=False))
 
     df['regex_label'] = df['Content'].apply(classify_with_regex)
     df_non_regex = df[df['regex_label'].isnull()].copy()
@@ -77,26 +75,33 @@ def process_ssh_logs(input_file='',
     load_dotenv(env_path)
     client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
-    llm_labels = []
-    for idx, log in enumerate(df_non_regex['Content']):
-        label = classify_with_llm(log, client)
-        llm_labels.append(label)
-        time.sleep(0.5)
-        print(f"[{idx + 1}/{len(df_non_regex)}] -> {label}")
+    # Bulk classify to prevent upload timeouts
+    logs_to_classify = df_non_regex['Content'].tolist()
+    llm_labels = classify_with_llm_bulk(logs_to_classify, client)
+    
+    # Ensure length matches in case LLM hallucinations change array size
+    if len(llm_labels) != len(logs_to_classify):
+        print("[WARN] Bulk LLM output length mismatch. Falling back to Unclassified.")
+        llm_labels = ["Unclassified"] * len(logs_to_classify)
 
     df_non_regex['llm_label'] = llm_labels
 
-    df['Target_Label'] = df['regex_label']
-    df.loc[df['Target_Label'].isnull(), 'Target_Label'] = df_non_regex['llm_label']
+    df['target_label'] = df['regex_label']
+    df.loc[df['target_label'].isnull(), 'target_label'] = df_non_regex['llm_label']
+    # Fill any remaining nulls (rows not in df_non_regex) with Unclassified
+    df['target_label'] = df['target_label'].fillna('Unclassified')
 
     ip_pattern = r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'
-    df['IP'] = df['Content'].str.extract(ip_pattern, expand=False)
-    df['IP'] = df['IP'].fillna("Unknown")
+    df['ip_address'] = df['Content'].str.extract(ip_pattern, expand=False)
+    df['ip_address'] = df['ip_address'].fillna("Unknown")
 
-    df_final = df.drop(columns=['regex_label', 'cluster'], errors='ignore')
+    df_final = df.drop(columns=['regex_label', 'cluster', 'Target_Label'], errors='ignore')
+    # Deduplicate columns — if raw CSV already had ip_address/target_label, drop those stale ones
+    # (our freshly computed versions are already in df_final via assignment above)
+    df_final = df_final.loc[:, ~df_final.columns.str.lower().duplicated(keep='last')]
     df_final.to_csv(output_file, index=False)
 
-    print(f"\n✅ Data saved to: {output_file}")
+    print(f"\n[OK] Data saved to: {output_file}")
     
     return df_final
 

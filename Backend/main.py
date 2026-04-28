@@ -34,19 +34,40 @@ else:
 def csv_to_sqlite_db(csv_path: str, db_path: str, table_name: str = "security_logs"):
     """
     Convert CSV file to SQLite database.
+    Normalises all column names to lowercase_with_underscores.
+    Ensures ip_address and target_label columns always exist.
     """
     Path(db_path).parent.mkdir(parents=True, exist_ok=True)
     df = pd.read_csv(csv_path)
+    # Normalise column names
     df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
+    # Deduplicate — if CSV had both Target_Label and target_label after lowercasing, keep last
+    df = df.loc[:, ~df.columns.duplicated(keep='last')]
+
+    # Guarantee required columns always exist
+    if 'ip_address' not in df.columns:
+        import re
+        ip_pat = re.compile(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})')
+        df['ip_address'] = df.get('content', pd.Series([''] * len(df))).astype(str).str.extract(ip_pat, expand=False).fillna('Unknown')
+
+    if 'target_label' not in df.columns:
+        df['target_label'] = 'Unclassified'
+
     conn = sqlite3.connect(db_path)
     try:
         df.to_sql(table_name, conn, if_exists="replace", index=False)
         cursor = conn.cursor()
-        cursor.execute(f"CREATE INDEX IF NOT EXISTS idx_ip ON {table_name}(ip_address);")
-        cursor.execute(f"CREATE INDEX IF NOT EXISTS idx_time ON {table_name}(time);")
+        # Only create indexes on columns that actually exist
+        cursor.execute(f"PRAGMA table_info({table_name})")
+        col_names = [row[1] for row in cursor.fetchall()]
+        if 'ip_address' in col_names:
+            cursor.execute(f"CREATE INDEX IF NOT EXISTS idx_ip ON {table_name}(ip_address);")
+        if 'time' in col_names:
+            cursor.execute(f"CREATE INDEX IF NOT EXISTS idx_time ON {table_name}(time);")
         conn.commit()
     except Exception as e:
         print(f"Error initializing DB: {e}")
+        raise e
     finally:
         conn.close()
 
@@ -452,6 +473,35 @@ def run_automated_threat_sweep(db_path=None, batch_size=25):
             print("⚠️  Table 'security_logs' not found in:", db_path)
             return {"error": "No security_logs table found. Upload and process a CSV first.",
                     "log_analyses": [], "threat_level": "Unknown", "executive_summary": ""}
+
+        # ── Column Resilience Check ───────────────────────────────────────────
+        local_cur.execute("PRAGMA table_info(security_logs)")
+        existing_cols = [c[1].lower() for c in local_cur.fetchall()]
+        
+        needs_commit = False
+        if 'ip_address' not in existing_cols:
+            print("⚠️ ip_address column missing. Attempting to recover from content...")
+            local_cur.execute("ALTER TABLE security_logs ADD COLUMN ip_address TEXT DEFAULT 'Unknown'")
+            local_cur.execute("SELECT rowid, content FROM security_logs")
+            rows_to_fix = local_cur.fetchall()
+            import re
+            ip_regex = re.compile(r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})')
+            for r_id, content in rows_to_fix:
+                match = ip_regex.search(content or "")
+                if match:
+                    local_cur.execute("UPDATE security_logs SET ip_address = ? WHERE rowid = ?", (match.group(1), r_id))
+            needs_commit = True
+
+        if 'target_label' not in existing_cols:
+            print("⚠️ target_label column missing. Adding default...")
+            local_cur.execute("ALTER TABLE security_logs ADD COLUMN target_label TEXT DEFAULT 'Unclassified'")
+            needs_commit = True
+            
+        if needs_commit:
+            local_conn.commit()
+            # Refresh cursor state after schema change
+            local_cur = local_conn.cursor()
+            local_cur.row_factory = sqlite3.Row
 
         sql = """
             SELECT ip_address, target_label, content, time,
