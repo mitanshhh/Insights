@@ -1,12 +1,13 @@
 # ---------- FRONTEND BUILD ----------
+
 FROM node:20-slim AS frontend-builder
 
-WORKDIR /app/Frontend
+WORKDIR /app/Frontend/frontend
 
-COPY Frontend/package*.json ./
+COPY Frontend/frontend/package*.json ./
 RUN npm install
 
-COPY Frontend/ .
+COPY Frontend/frontend/ .
 RUN npm run build
 
 
