@@ -1,12 +1,14 @@
 #!/bin/sh
 
-echo "Starting backend..."
-cd /app/Backend
+echo "Starting app..."
+
+# Start backend (use the one inside Frontend/backend)
+cd /app/Frontend/backend
 python3 app.py &
 
-echo "Waiting for backend..."
 sleep 3
 
-echo "Starting frontend on port $PORT..."
+# Start frontend (Next.js)
 cd /app/Frontend/frontend
+npm run build
 npm start

@@ -2,22 +2,6 @@
 
 > **Turn Queries into Clarity.** Analyze logs, detect anomalies, and secure your systems with a context-aware AI engine designed for security professionals.
 
----
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Architecture](#architecture)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Environment Variables](#environment-variables)
-  - [Running Locally](#running-locally)
-- [Deployment (Google Cloud Run)](#deployment-google-cloud-run)
-- [API Reference](#api-reference)
-- [Team](#team)
 
 ---
 

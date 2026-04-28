@@ -1,63 +1,38 @@
-# ────────────────────────────────────────────────────────────────
-# Stage 1: Build Next.js
-# ────────────────────────────────────────────────────────────────
+# ---------- FRONTEND BUILD ----------
 FROM node:20-slim AS frontend-builder
 
-WORKDIR /app/frontend/frontend
+WORKDIR /app/Frontend/frontend
 
-COPY frontend/frontend/package*.json ./
-RUN npm ci
+COPY Frontend/frontend/package*.json ./
+RUN npm install
 
-COPY frontend/frontend ./
+COPY Frontend/frontend/ .
 RUN npm run build
 
-# ────────────────────────────────────────────────────────────────
-# Stage 2: Final image — Python + Node + built Next.js
-# ────────────────────────────────────────────────────────────────
+
+# ---------- FINAL IMAGE ----------
 FROM python:3.11-slim
 
-# Install Node.js 20 into the Python image
-RUN apt-get update && apt-get install -y \
-    curl \
-    gnupg \
+# Install Node.js
+RUN apt-get update && apt-get install -y curl gnupg \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get install -y nodejs
 
 WORKDIR /app
 
-# ── Python dependencies ──────────────────────────────────────────
-COPY Backend/requirements.txt ./Backend/requirements.txt
-RUN pip install --no-cache-dir -r Backend/requirements.txt
+# Backend setup
+COPY Frontend/backend/requirements.txt ./Frontend/backend/requirements.txt
+RUN pip install --no-cache-dir -r Frontend/backend/requirements.txt
 
-COPY frontend/backend/requirements.txt ./frontend/backend/requirements.txt
-RUN pip install --no-cache-dir -r frontend/backend/requirements.txt
+COPY Frontend/backend/ ./Frontend/backend/
 
-# ── Copy source ──────────────────────────────────────────────────
-# Backend AI engine
-COPY Backend/ ./Backend/
+# Copy frontend build
+COPY --from=frontend-builder /app/Frontend/frontend ./Frontend/frontend
 
-# Flask backend
-COPY frontend/backend/ ./frontend/backend/
+# Copy start script
+COPY start.sh .
+RUN chmod +x start.sh
 
-# Next.js standalone build output
-COPY --from=frontend-builder /app/frontend/frontend/.next/standalone ./frontend/frontend/
-COPY --from=frontend-builder /app/frontend/frontend/.next/static ./frontend/frontend/.next/static
-COPY --from=frontend-builder /app/frontend/frontend/public ./frontend/frontend/public
-
-# Persistent data directory
-RUN mkdir -p ./Backend/data
-
-# Start script
-COPY start.sh ./start.sh
-RUN chmod +x ./start.sh
-
-# Cloud Run passes PORT env var (default 8080 for Next.js)
 ENV PORT=8080
-ENV HOSTNAME=0.0.0.0
-ENV PYTHONIOENCODING=utf-8
-
-EXPOSE 8080
 
 CMD ["./start.sh"]
