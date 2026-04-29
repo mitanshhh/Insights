@@ -14,7 +14,9 @@ import sqlite3
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
 
+from flask_cors import CORS
 
+CORS(app, origins=["https://insights-analytics.vercel.app/"])
 
 # Load env variables from root folder
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
