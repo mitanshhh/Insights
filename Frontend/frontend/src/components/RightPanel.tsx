@@ -52,7 +52,7 @@ export default function RightPanel({ onClose }: RightPanelProps) {
   };
 
   return (
-    <div className="w-96 shrink-0 bg-bg-panel border-l border-border flex flex-col pt-4 pb-6 px-5 relative h-full">
+    <div className="w-full h-full bg-bg-panel flex flex-col pt-4 pb-6 px-5 relative">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2 text-white">

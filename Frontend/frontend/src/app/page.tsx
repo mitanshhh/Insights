@@ -62,6 +62,22 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
+        
+        {/* Mobile Menu */}
+        <div className={`md:hidden absolute top-full left-0 w-full bg-[#0f0f11] border-b border-white/5 transition-all duration-300 ${isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
+           <nav className="flex flex-col items-center gap-6 py-6">
+              <Link href="#features" className="text-lg font-medium hover:text-brand-primary" onClick={() => setIsMenuOpen(false)}>Features</Link>
+              <Link href="#simulation" className="text-lg font-medium hover:text-brand-primary" onClick={() => setIsMenuOpen(false)}>Simulation</Link>
+              <Link href="#contact" className="text-lg font-medium hover:text-brand-primary" onClick={() => setIsMenuOpen(false)}>Contact</Link>
+              <Link 
+                href="/dashboard" 
+                className="px-8 py-3 bg-brand-primary hover:bg-brand-primary-hover text-white rounded-xl font-bold text-base transition-all shadow-[0_4px_15px_rgba(249,115,22,0.4)]"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Get Started
+              </Link>
+           </nav>
+        </div>
       </header>
 
       <main>
@@ -174,7 +190,7 @@ export default function LandingPage() {
                  </div>
 
                  <div className="space-y-8">
-                    <h3 className="text-white font-bold text-sm uppercase tracking-widest">Contact Engineering</h3>
+                    <h3 className="text-white font-bold text-sm uppercase tracking-widest">Contact Developers</h3>
                     <div className="space-y-6">
                        <ContactPerson name="Mitansh Jadhav" email="mitansh.jadhav2007@gmail.com" github="https://github.com/mitanshhh/" />
                        <ContactPerson name="Om Korade" email="omkorade23@gmail.com" github="https://github.com/omkorade23" />

@@ -8,9 +8,10 @@ import { usePathname, useRouter } from "next/navigation";
 interface NavbarProps {
   isRightPanelOpen: boolean;
   setIsRightPanelOpen: (val: boolean) => void;
+  onOpenSidebar?: () => void;
 }
 
-export default function Navbar({ isRightPanelOpen, setIsRightPanelOpen }: NavbarProps) {
+export default function Navbar({ isRightPanelOpen, setIsRightPanelOpen, onOpenSidebar }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
 

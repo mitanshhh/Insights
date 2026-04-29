@@ -217,7 +217,7 @@ export default function NetworkSimulation() {
   }, [logInput]);
 
   return (
-    <div className="flex flex-col h-[700px] w-full bg-bg-base border border-border rounded-2xl overflow-hidden shadow-2xl relative">
+    <div className="flex flex-col h-[80vh] md:h-[700px] w-full bg-bg-base border border-border rounded-2xl overflow-hidden shadow-2xl relative">
       {/* Header Area */}
       <div className="h-16 shrink-0 border-b border-border bg-bg-sidebar/50 backdrop-blur-md flex items-center justify-between px-6 z-20">
         <div className="flex items-center gap-3">
@@ -236,9 +236,9 @@ export default function NetworkSimulation() {
         </div>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
         {/* Left Panel: Inputs */}
-        <div className="w-80 shrink-0 border-r border-border bg-bg-sidebar/30 p-6 flex flex-col gap-6 z-10 overflow-y-auto">
+        <div className="w-full md:w-80 shrink-0 border-b md:border-b-0 md:border-r border-border bg-bg-sidebar/30 p-6 flex flex-col gap-6 z-10 md:overflow-y-auto min-h-[350px] md:min-h-0">
            <div className="space-y-4">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
                  <Zap className="w-3 h-3" />
@@ -299,7 +299,7 @@ export default function NetworkSimulation() {
         </div>
 
         {/* Center Canvas */}
-        <div className="flex-1 relative bg-[radial-gradient(circle_at_center,_#111113_0%,_#0f0f11_100%)]">
+        <div className="flex-1 min-h-[400px] md:min-h-0 relative bg-[radial-gradient(circle_at_center,_#111113_0%,_#0f0f11_100%)]">
            <div id="cy-container" ref={containerRef} className="absolute inset-0 w-full h-full z-50" />
            
            {/* Floating HUD elements */}
@@ -313,7 +313,7 @@ export default function NetworkSimulation() {
         </div>
 
         {/* Right Panel: Selected Node Details */}
-        <div className="w-80 shrink-0 border-l border-border bg-bg-sidebar/30 flex flex-col z-10">
+        <div className="w-full md:w-80 shrink-0 border-t md:border-t-0 md:border-l border-border bg-bg-sidebar/30 flex flex-col z-10 min-h-[350px] md:min-h-0">
            {selectedNode ? (
              <div className="p-6 h-full flex flex-col animate-in fade-in slide-in-from-right-4 duration-300">
                 <div className="flex items-start justify-between mb-8">
