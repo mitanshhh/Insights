@@ -10,8 +10,8 @@ import json
 from dotenv import load_dotenv
 
 from llm_prompting import analyze_soc_threat
-
 from fastapi import FastAPI
+load_dotenv()
 
 app = FastAPI()
 
