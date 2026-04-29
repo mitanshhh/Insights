@@ -2,7 +2,7 @@
 
 > **Turn Queries into Clarity.** Analyze logs, detect anomalies, and secure your systems with a context-aware AI engine designed for security professionals.
 
-
+VISIT: https://insights-analytics.vercel.app/
 ---
 
 ## Overview
