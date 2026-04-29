@@ -44,7 +44,6 @@ def _load_backend_module(module_name: str, filename: str):
     return mod
 
 try:
-    # Use explicit loading to prevent local 'main.py' shadowing
     _ai_main = _load_backend_module("main", "main.py")
     _ai_classif = _load_backend_module("classification_log", "classification_log.py")
     
@@ -56,7 +55,9 @@ try:
     _AI_AVAILABLE = True
     print("[OK] AI engine imported successfully.")
 except Exception as _e:
-    print(f"[WARN] AI engine import failed: {_e}. /api/project/* routes will return 503.")
+    import traceback
+    print(f"[WARN] AI engine import failed: {_e}")
+    print(traceback.format_exc())  # ← ADD THIS LINE
     _AI_AVAILABLE = False
 
 
