@@ -31,38 +31,6 @@
 
 ---
 
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                    Docker Container                      │
-│                                                         │
-│  ┌─────────────────────┐   ┌─────────────────────────┐  │
-│  │   Next.js Frontend  │   │    Flask Backend API    │  │
-│  │   (port 8080)       │──▶│    (port 8000)          │  │
-│  │                     │   │                         │  │
-│  │  /dashboard         │   │  /api/project/*         │  │
-│  │  /dashboard/analysis│   │  /api/sql               │  │
-│  └─────────────────────┘   │  /api/auth/*            │  │
-│           ▲                └──────────┬──────────────┘  │
-│    next.config.ts                     │                  │
-│    rewrites /api/* → :8000            ▼                  │
-│                              ┌────────────────┐          │
-│                              │  AI Engine     │          │
-│                              │  Backend/      │          │
-│                              │  main.py       │          │
-│                              │  classification│          │
-│                              │  _log.py       │          │
-│                              └────────┬───────┘          │
-│                                       │                  │
-│                              ┌────────▼───────┐          │
-│                              │  SQLite DBs    │          │
-│                              │  Backend/data/ │          │
-│                              └────────────────┘          │
-└─────────────────────────────────────────────────────────┘
-```
-
----
 
 ## Tech Stack
 
@@ -118,27 +86,6 @@ Hackup/
 
 ---
 
-## Getting Started
-
-### Prerequisites
-
-- Python 3.11+
-- Node.js 20+
-- A [Groq API Key](https://console.groq.com/)
-
-### Environment Variables
-
-Create a `.env` file at the project root:
-
-```env
-GROQ_API_KEY=your_groq_api_key_here
-SECRET_KEY=any_long_random_string_for_jwt
-
-# Optional — for email password reset
-MAIL_USERNAME=your@gmail.com
-MAIL_PASSWORD=your_gmail_app_password
-```
-
 ### Running Locally
 
 **1. Start the Flask backend**
@@ -167,37 +114,10 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## Deployment (Google Cloud Run)
-
-See **[DEPLOY.md](./DEPLOY.md)** for the full step-by-step guide.
-
-**Quick summary (7 commands):**
-
-```bash
-# 1. Set project
-gcloud config set project YOUR_PROJECT_ID
-
-# 2. Build image
-docker build -t us-central1-docker.pkg.dev/YOUR_PROJECT_ID/insights/app:latest .
-
-# 3. Push image
-docker push us-central1-docker.pkg.dev/YOUR_PROJECT_ID/insights/app:latest
-
-# 4. Deploy
-gcloud run deploy insights \
-  --image us-central1-docker.pkg.dev/YOUR_PROJECT_ID/insights/app:latest \
-  --platform managed --region us-central1 \
-  --allow-unauthenticated --port 8080 --memory 2Gi \
-  --set-env-vars GROQ_API_KEY=YOUR_KEY,SECRET_KEY=YOUR_SECRET
-```
-
----
-
 ## API Reference
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/register` | Register a new user |
 | `POST` | `/api/login` | Login, returns JWT cookie |
 | `GET` | `/api/projects` | List all projects for current user |
 | `POST` | `/api/project` | Create a new project |
