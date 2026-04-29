@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { User, Mail, Lock, Save, LogOut } from "lucide-react";
 
+const API = "https://insights-aphh.onrender.com";
+
 export default function SettingsPage() {
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
@@ -12,7 +14,7 @@ export default function SettingsPage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch('/api/user/profile');
+        const res = await fetch(`${API}/api/user/profile`);
         if (res.ok) {
           const data = await res.json();
           setName(data.name);
@@ -27,7 +29,7 @@ export default function SettingsPage() {
     e.preventDefault();
     setStatus({ type: "info", message: "Updating profile..." });
     try {
-      const res = await fetch('/api/user/update', {
+      const res = await fetch(`${API}/api/user/update`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // Ensure cookies are sent
@@ -51,7 +53,7 @@ export default function SettingsPage() {
     if (!password) return;
     setStatus({ type: "info", message: "Updating password..." });
     try {
-      const res = await fetch('/api/user/update-password', {
+      const res = await fetch(`${API}/api/user/update-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // Ensure cookies are sent
@@ -71,7 +73,7 @@ export default function SettingsPage() {
 
   const handleSignOut = async () => {
     try {
-      await fetch('/api/logout', { method: 'POST' });
+      await fetch(`${API}/api/logout`, { method: 'POST' });
       window.location.href = "/";
     } catch (err) {
       window.location.href = "/";

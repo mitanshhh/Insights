@@ -44,7 +44,7 @@ const DashboardContext = createContext<DashboardContextType | undefined>(undefin
 // next.config.ts rewrites /api/:path* → http://127.0.0.1:8000/api/:path*
 // This avoids all CORS preflight issues for cross-origin requests including
 // multipart/form-data file uploads.
-const API = "";  // empty = same-origin, proxy handles routing
+const API = "https://insights-aphh.onrender.com";  // empty = same-origin, proxy handles routing
 
 export function DashboardProvider({ children }: { children: React.ReactNode }) {
   const [projects, setProjects] = useState<Project[]>([]);

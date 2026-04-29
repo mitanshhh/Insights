@@ -3,7 +3,7 @@
 import { Play, Database, History, X, Terminal, Table as TableIcon, Loader2, AlertCircle } from "lucide-react";
 import { useState } from "react";
 import { useDashboard } from "@/context/DashboardContext";
-
+const API = "https://insights-aphh.onrender.com";
 interface RightPanelProps {
   onKeepOpen?: boolean;
   onClose: () => void;
@@ -30,7 +30,7 @@ export default function RightPanel({ onClose }: RightPanelProps) {
 
     try {
       // Prompt requirement: Wire "Run" button to POST /api/sql
-      const res = await fetch(`/api/sql`, {
+      const res = await fetch(`${API}/api/sql`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sql: query, project_id: activeProjectId || "" }),
