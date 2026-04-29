@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 
 from flask_cors import CORS
 
-CORS(app, origins=["https://insights-analytics.vercel.app/"])
+
 
 # Load env variables from root folder
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
@@ -62,7 +62,9 @@ except Exception as _e:
 
 app = Flask(__name__)
 # Enable CORS for next.js dashboard running on port 3000
-CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": "*"}})
+CORS(app, resources={r"/api/*": {
+    "origins": ["https://insights-analytics.vercel.app"]
+}})
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'default_secret')
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50 MB upload limit
 
