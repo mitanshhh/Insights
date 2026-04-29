@@ -1,8 +1,9 @@
 import json
-import os
-from groq import Groq
 from dotenv import load_dotenv
+from groq import Groq
+import os
 
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 def analyze_soc_threat(json_data, client):
     """
     Ingests log data and returns a structured JSON SOC report.

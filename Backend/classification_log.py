@@ -5,6 +5,10 @@ import pandas as pd
 import numpy as np
 from groq import Groq
 from dotenv import load_dotenv
+from groq import Groq
+import os
+
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 def classify_with_regex(content):
     patterns = {
