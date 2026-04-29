@@ -22,7 +22,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
 
 
   return (
-    <div className="flex h-screen w-full bg-bg-base text-white overflow-hidden font-sans">
+    <div className="flex h-screen w-full bg-bg-base text-white overflow-hidden font-sans animate-slide-up-fade">
       <Sidebar 
         projects={projects}
         activeProjectId={activeProjectId}

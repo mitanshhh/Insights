@@ -84,7 +84,7 @@ export default function Sidebar({ projects, activeProjectId, onSelectProject, on
       <div className="mt-auto pt-4 border-t border-border flex flex-col gap-2">
         {/* Navigation Links */}
         <div className="flex flex-col gap-1 mb-2">
-           <Link href="/dashboard" className="px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
+           <Link href="/" className="px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer">
               Home
            </Link>
            <Link href="/dashboard" className="px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors cursor-pointer">

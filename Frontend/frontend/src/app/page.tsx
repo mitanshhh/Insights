@@ -28,7 +28,7 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#000000] text-[#D4D4D8] font-sans selection:bg-brand-primary selection:text-white">
+    <div className="min-h-screen bg-[#000000] text-[#D4D4D8] font-sans selection:bg-brand-primary selection:text-white animate-slide-up-fade">
       {/* Noise Overlay */}
       <div className="fixed inset-0 pointer-events-none z-50 opacity-[0.04] bg-[url('data:image/svg+xml,%3Csvg_viewBox=%270_0_200_200%27_xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cfilter_id=%27noiseFilter%27%3E%3CfeTurbulence_type=%27fractalNoise%27_baseFrequency=%270.75%27_numOctaves=%273%27_stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect_width=%27100%25%27_height=%27100%25%27_filter=%27url(%23noiseFilter)%27/%3E%3C/svg%3E')]" />
 
@@ -66,7 +66,7 @@ export default function LandingPage() {
 
       <main>
         {/* Hero Section */}
-        <section className="relative pt-48 pb-24 text-center px-6 overflow-hidden">
+        <section className="relative pt-24 pb-8 text-center px-6 overflow-hidden">
            {/* Background glowing grid design */}
            <div className="absolute inset-0 z-0 pointer-events-none">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-primary/20 blur-[150px] rounded-full" />
@@ -82,14 +82,14 @@ export default function LandingPage() {
                  Analyze logs, detect anomalies, and secure your systems with a context-aware AI engine designed for security professionals.
               </p>
               
-              <div className="w-full max-w-5xl mx-auto rounded-2xl overflow-hidden border border-brand-primary/20 shadow-[0_0_50px_rgba(249,115,22,0.1)] mb-12 animate-in fade-in zoom-in duration-1000 delay-300">
+              <div className="w-full max-w-7xl mx-auto rounded-2xl overflow-hidden border border-brand-primary/20 shadow-[0_0_50px_rgba(249,115,22,0.1)] mb-4 animate-in fade-in zoom-in duration-1000 delay-300">
                  <img src="/landing_page_dashboard.png" alt="Insights Dashboard" className="w-full h-auto object-cover grayscale-[0.2] hover:grayscale-0 transition-all duration-700" />
               </div>
            </div>
         </section>
 
         {/* Features Section */}
-        <section id="features" className="py-24 bg-gradient-to-b from-[#000000] to-[#0a0a0c]">
+        <section id="features" className="py-12 bg-gradient-to-b from-[#000000] to-[#0a0a0c]">
            <div className="container mx-auto px-6">
               <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-16 underline decoration-brand-primary/30 underline-offset-8">
                  AI-Driven Detection Workflow
@@ -176,8 +176,8 @@ export default function LandingPage() {
                  <div className="space-y-8">
                     <h3 className="text-white font-bold text-sm uppercase tracking-widest">Contact Engineering</h3>
                     <div className="space-y-6">
-                       <ContactPerson name="Mitansh Jadhav" email="mitansh.jadhav2007@gmail.com" />
-                       <ContactPerson name="Om Korade" email="omkorade23@gmail.com" />
+                       <ContactPerson name="Mitansh Jadhav" email="mitansh.jadhav2007@gmail.com" github="https://github.com/mitanshhh/" />
+                       <ContactPerson name="Om Korade" email="omkorade23@gmail.com" github="https://github.com/omkorade23" />
                     </div>
                  </div>
               </div>
@@ -185,8 +185,7 @@ export default function LandingPage() {
               <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-gray-600 font-bold uppercase tracking-widest">
                  <p>© 2026 Insights Intelligence</p>
                  <div className="flex gap-8">
-                    <span className="hover:text-brand-primary cursor-pointer transition-colors">Privacy Policy</span>
-                    <span className="hover:text-brand-primary cursor-pointer transition-colors">Github OSS</span>
+                    <Link href="https://github.com/mitanshhh/Insights" target="_blank" className="hover:text-brand-primary cursor-pointer transition-colors">Github Repo</Link>
                  </div>
               </div>
            </div>
@@ -203,7 +202,7 @@ function FeatureCard({ step, title, desc, icon }: { step: string, title: string,
          <div className="p-3 bg-brand-primary/10 rounded-xl text-brand-primary group-hover:bg-brand-primary group-hover:text-white transition-all duration-300">
             {icon}
          </div>
-         <span className="text-4xl font-black text-white/5 tracking-tighter italic">0{step}</span>
+         <span className="text-4xl font-black text-white tracking-tighter italic">0{step}</span>
       </div>
       <h3 className="text-xl font-bold text-white mb-3">{title}</h3>
       <p className="text-gray-500 text-sm leading-relaxed">{desc}</p>
@@ -211,18 +210,18 @@ function FeatureCard({ step, title, desc, icon }: { step: string, title: string,
   );
 }
 
-function ContactPerson({ name, email }: { name: string, email: string }) {
+function ContactPerson({ name, email, github }: { name: string, email: string, github: string }) {
   return (
     <div className="group">
-       <div className="text-white font-semibold text-sm mb-2 group-hover:text-brand-primary transition-colors">{name}</div>
+       <div className="text-white font-semibold text-lg mb-2 group-hover:text-brand-primary transition-colors">{name}</div>
        <div className="flex items-center gap-4">
           <a href={`mailto:${email}`} className="text-gray-500 hover:text-white transition-colors">
              <Mail className="w-4 h-4" />
           </a>
-          <Link href="#" className="text-gray-500 hover:text-white transition-colors">
+          <Link href={github} target="_blank" className="text-gray-500 hover:text-white transition-colors">
              <ExternalLink className="w-4 h-4" />
           </Link>
-          <span className="text-[10px] text-gray-700 font-mono italic truncate">{email}</span>
+          <span className="text-xs text-white font-normal truncate">{email}</span>
        </div>
     </div>
   );
