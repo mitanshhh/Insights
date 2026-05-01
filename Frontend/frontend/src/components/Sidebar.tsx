@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { Plus, Trash2, X, Home, MessageSquare, ShieldAlert } from "lucide-react";
+import { Plus, Trash2, X, Database, MessageSquare, ShieldAlert } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { Project } from "@/context/DashboardContext";
@@ -42,7 +42,7 @@ export default function Sidebar({
   };
 
   const navLinks = [
-    { href: "/", label: "Home", icon: <Home className="w-5 h-5" /> },
+    { href: "https://github.com/mitanshhh/Insights/blob/main/Sample%20Dataset/OpenSSH_structured.csv", label: "Sample Dataset", icon: <Database className="w-5 h-5" /> },
     { href: "/dashboard", label: "Chat", icon: <MessageSquare className="w-5 h-5" /> },
     { href: "/dashboard/analysis", label: "Threat Analysis", icon: <ShieldAlert className="w-5 h-5" /> },
   ];
